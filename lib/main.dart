@@ -20,18 +20,31 @@ class ForageCommand extends Command {
 
   final D20 _d20 = D20();
   final List<Ingredient> _ingredients = List()
-    ..add(Ingredient([2, 12], 'Wisp\'s Breath', 'Slows intoxication.'))
-    ..add(Ingredient([3, 11], 'Blue Cap', 'Slows infection from common diseases.'))
-    ..add(Ingredient([4, 10], 'Spur Root', 'Reduces visible scarring.'))
-    ..add(Ingredient([5, 9], 'Lavender Seeds', 'Masks your scent.'))
-    ..add(Ingredient([6, 7, 8], 'Royal Lichen', 'Recover maximum from next hit die rolled within 1 minute.'));
+    ..add(Ingredient.WispsBreath)
+    ..add(Ingredient.BlueCap)
+    ..add(Ingredient.SpurRoot)
+    ..add(Ingredient.LavenderSeeds)
+    ..add(Ingredient.RoyalLichen);
   final List<Ingredient> _specialIngredients = List()
-    ..add(Ingredient([1], 'Rinwort', 'Halts petrification.', isSpecial: true))
-    ..add(Ingredient([2], 'Dried Ginko Leaf', '+5 bunos to Passive Perception for 1 hour.', isSpecial: true))
-    ..add(Ingredient([3], 'Hewleaf', 'Common antitoxin.', isSpecial: true))
-    ..add(Ingredient([4], 'Hyssop Dew', 'Darkvision (30 ft.) for 1 hour.', isSpecial: true))
-    ..add(Ingredient([5], 'Lilythistle', 'Can hold breath for double your normal time.', isSpecial: true))
-    ..add(Ingredient([6], 'Silver Thornberry', 'Heals for 1 hit point.', isSpecial: true));
+    ..add(Ingredient.Rinwort)
+    ..add(Ingredient.DriedGinkoLeaf)
+    ..add(Ingredient.Hewleaf)
+    ..add(Ingredient.HyssopDew)
+    ..add(Ingredient.Lilythistle)
+    ..add(Ingredient.SilverThornberry);
+  final List<Poultice> _poultices = List()
+    ..add(Poultice.WispsBreath)
+    ..add(Poultice.BlueCap)
+    ..add(Poultice.SpurRoot)
+    ..add(Poultice.LavenderSeeds)
+    ..add(Poultice.RoyalLichen);
+  final List<Poultice> _specialPoultices = List()
+    ..add(Poultice.Rinwort)
+    ..add(Poultice.DriedGinkoLeaf)
+    ..add(Poultice.Hewleaf)
+    ..add(Poultice.HyssopDew)
+    ..add(Poultice.Lilythistle)
+    ..add(Poultice.SilverThornberry);
   final Map<ForagingMethod, int> _methodTable = Map()
     ..putIfAbsent(ForagingMethod.idle, () => 10)
     ..putIfAbsent(ForagingMethod.slow_pace, () => 15)
@@ -82,12 +95,54 @@ class Ingredient {
   final bool isSpecial;
   final ApplicationType application;
 
-  Ingredient(this.rolls, this.name, this.effect, {this.isSpecial = false, this.application = ApplicationType.Unspecified});
+  const Ingredient(this.rolls, this.name, this.effect, {this.isSpecial = false, this.application = ApplicationType.Unspecified});
 
   @override
   String toString() {
     return '${rolls} ${name}${isSpecial ? '*' : ''}: ${effect}';
   }
+
+  static const WispsBreath = Ingredient([2, 12], 'Wisp\'s Breath', 'Slows intoxication.');
+  static const BlueCap = Ingredient([3, 11], 'Blue Cap', 'Slows infection from common diseases.');
+  static const SpurRoot = Ingredient([4, 10], 'Spur Root', 'Reduces visible scarring.');
+  static const LavenderSeeds = Ingredient([5, 9], 'Lavender Seeds', 'Masks your scent.');
+  static const RoyalLichen = Ingredient([6, 7, 8], 'Royal Lichen', 'Recover maximum from next hit die rolled within 1 minute.');
+
+  static const Rinwort = Ingredient([1], 'Rinwort', 'Halts petrification.', isSpecial: true);
+  static const DriedGinkoLeaf = Ingredient([2], 'Dried Ginko Leaf', '+5 bunos to Passive Perception for 1 hour.', isSpecial: true);
+  static const Hewleaf = Ingredient([3], 'Hewleaf', 'Common antitoxin.', isSpecial: true);
+  static const HyssopDew = Ingredient([4], 'Hyssop Dew', 'Darkvision (30 ft.) for 1 hour.', isSpecial: true);
+  static const Lilythistle = Ingredient([5], 'Lilythistle', 'Can hold breath for double your normal time.', isSpecial: true);
+  static const SilverThornberry = Ingredient([6], 'Silver Thornberry', 'Heals for 1 hit point.', isSpecial: true);
+}
+
+class Poultice {
+  final Ingredient ingredient;
+  final String effect;
+  final int quantity;
+  final int check;
+  final bool isSpecial;
+  final ApplicationType application;
+
+  const Poultice(this.ingredient, this.quantity, this.check, this.effect, {this.isSpecial = false, this.application = ApplicationType.Unspecified});
+
+  @override
+  String toString() {
+    return '[${check}] ${quantity}x ${ingredient.name}: ${effect}';
+  }
+
+  static const WispsBreath = Poultice(Ingredient.WispsBreath, 6, 17, 'Cures hangover and removes one level of exhaustion.');
+  static const BlueCap = Poultice(Ingredient.BlueCap, 5, 15, 'Cures common disease.');
+  static const SpurRoot = Poultice(Ingredient.SpurRoot, 3, 19, 'Starts regrowth of minor appendage, such as a finger.');
+  static const LavenderSeeds = Poultice(Ingredient.LavenderSeeds, 5, 18, 'Advantage on Dexterity (Stealth) checks for 1 minute.');
+  static const RoyalLichen = Poultice(Ingredient.RoyalLichen, 5, 20, 'Heals for 2d4 + 2 hit points.');
+
+  static const Rinwort = Poultice(Ingredient.Rinwort, 4, 18, 'Reverses total petrification.', isSpecial: true);
+  static const DriedGinkoLeaf = Poultice(Ingredient.DriedGinkoLeaf, 3, 15, 'Cannot be surprised for 1d4 hours.', isSpecial: true);
+  static const Hewleaf = Poultice(Ingredient.Hewleaf, 4, 20, 'Immune to poisoned condition and resistant to poison damage for 1 hour.', isSpecial: true);
+  static const HyssopDew = Poultice(Ingredient.HyssopDew, 3, 19, 'Advantage on all sight based Wisdom (Perception) and Intelligence (Investigation) checks for 1d4 hours.', isSpecial: true);
+  static const Lilythistle = Poultice(Ingredient.Lilythistle, 4, 18, 'Do not need air for 1 hour.', isSpecial: true);
+  static const SilverThornberry = Poultice(Ingredient.SilverThornberry, 5, 20, 'Heals for 4d4 + 4 hit points.', isSpecial: true);
 }
 
 void main(List<String> arguments) {
