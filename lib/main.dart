@@ -32,28 +32,15 @@ class ForageCommand extends Command {
     ..add(Ingredient.HyssopDew)
     ..add(Ingredient.Lilythistle)
     ..add(Ingredient.SilverThornberry);
-  final List<Poultice> _poultices = List()
-    ..add(Poultice.WispsBreath)
-    ..add(Poultice.BlueCap)
-    ..add(Poultice.SpurRoot)
-    ..add(Poultice.LavenderSeeds)
-    ..add(Poultice.RoyalLichen);
-  final List<Poultice> _specialPoultices = List()
-    ..add(Poultice.Rinwort)
-    ..add(Poultice.DriedGinkoLeaf)
-    ..add(Poultice.Hewleaf)
-    ..add(Poultice.HyssopDew)
-    ..add(Poultice.Lilythistle)
-    ..add(Poultice.SilverThornberry);
   final Map<ForagingMethod, int> _methodTable = Map()
     ..putIfAbsent(ForagingMethod.idle, () => 10)
     ..putIfAbsent(ForagingMethod.slow_pace, () => 15)
     ..putIfAbsent(ForagingMethod.normal_pace, () => 18)
     ..putIfAbsent(ForagingMethod.fast_pace, () => 21);
 
-  get hours => int.parse(argResults['hours']);
-  get check => int.parse(argResults['check']);
-  get method {
+  int get hours => int.parse(argResults['hours']);
+  int get check => int.parse(argResults['check']);
+  ForagingMethod get method {
     return ForagingMethod.values.firstWhere((f) => f.toString() == 'ForagingMethod.${argResults['method']}', orElse: () => null);
   }
 
@@ -81,6 +68,50 @@ class ForageCommand extends Command {
     for (var i = 0; i < bag.length; i++) {
       print('${bag.keys.elementAt(i)?.name}: ${bag.values.elementAt(i)}');
     }
+  }
+}
+
+class CraftCommand extends Command {
+  get name => 'craft';
+  get description => 'Herbalism crafting helper.';
+
+  CraftCommand()
+    : super() {
+      argParser
+        ..addOption('check', abbr: 'c', defaultsTo: '0', help: 'Modifier of your Wisdom crafting check, using your proeficiency in Herbalism Kit.')
+        ..addOption('poultice', abbr: 'p', help: 'The poultice you\'re trying to craft. Eg: wisps_breath, dried_ginko, hewleaf.');
+    }
+
+  final D20 _d20 = D20();
+  final Map<String, Poultice> _poulticeTable = Map()
+    ..putIfAbsent('wisps_breath', () => Poultice.WispsBreath)
+    ..putIfAbsent('blue_cap', () => Poultice.BlueCap)
+    ..putIfAbsent('spur_root', () => Poultice.SpurRoot)
+    ..putIfAbsent('lavender_seeds', () => Poultice.LavenderSeeds)
+    ..putIfAbsent('royal_lichen', () => Poultice.RoyalLichen)
+    ..putIfAbsent('rinwort', () => Poultice.Rinwort)
+    ..putIfAbsent('dried_ginko', () => Poultice.DriedGinko)
+    ..putIfAbsent('hewleaf', () => Poultice.Hewleaf)
+    ..putIfAbsent('hyssop_dew', () => Poultice.HyssopDew)
+    ..putIfAbsent('lilythistle', () => Poultice.Lilythistle)
+    ..putIfAbsent('silver_thornberry', () => Poultice.SilverThornberry);
+
+  int get check => int.parse(argResults['check']);
+  Poultice get poultice {
+    return _poulticeTable[argResults['poultice']];
+  }
+
+  bool _singleCraft(Poultice poultice) {
+    int roll = _d20.roll('1d20+${check}');
+    return roll >= poultice.check;
+  }
+
+  Future run() async {
+    bool successful = _singleCraft(poultice);
+    print('''
+Crafting was${!successful ? ' NOT' : ''} successful.
+You have spent ${poultice.quantity}x ${poultice.ingredient.name} and 10 minutes.
+    ''');
   }
 }
 
@@ -138,7 +169,7 @@ class Poultice {
   static const RoyalLichen = Poultice(Ingredient.RoyalLichen, 5, 20, 'Heals for 2d4 + 2 hit points.');
 
   static const Rinwort = Poultice(Ingredient.Rinwort, 4, 18, 'Reverses total petrification.', isSpecial: true);
-  static const DriedGinkoLeaf = Poultice(Ingredient.DriedGinkoLeaf, 3, 15, 'Cannot be surprised for 1d4 hours.', isSpecial: true);
+  static const DriedGinko = Poultice(Ingredient.DriedGinkoLeaf, 3, 15, 'Cannot be surprised for 1d4 hours.', isSpecial: true);
   static const Hewleaf = Poultice(Ingredient.Hewleaf, 4, 20, 'Immune to poisoned condition and resistant to poison damage for 1 hour.', isSpecial: true);
   static const HyssopDew = Poultice(Ingredient.HyssopDew, 3, 19, 'Advantage on all sight based Wisdom (Perception) and Intelligence (Investigation) checks for 1d4 hours.', isSpecial: true);
   static const Lilythistle = Poultice(Ingredient.Lilythistle, 4, 18, 'Do not need air for 1 hour.', isSpecial: true);
@@ -147,6 +178,7 @@ class Poultice {
 
 void main(List<String> arguments) {
   CommandRunner runner = new CommandRunner('mesa_for_dummies', 'Set of utilities to our RPG sessions.')
+    ..addCommand(new CraftCommand())
     ..addCommand(new ForageCommand());
   runner.run(arguments);
 }
