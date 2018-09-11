@@ -28,7 +28,7 @@ void main() {
     expect(die.roll('d6       +         d4'), 6);
   });
 
-  test('whitespace between "d" work as well', () {
+  test('whitespace between "d" work as well, but who would do that?', () {
     D20 die = D20(random: Random(0));
     expect(die.roll('d 20'), 16);
   });
@@ -36,5 +36,11 @@ void main() {
   test('more complex math operations work', () {
     D20 die = D20(random: Random(0));
     expect(die.roll('d20 * 2 + 8 * sin(0) - 10'), 22);
+  });
+
+  test('different seeds yield different rolls', () {
+    D20 die1 = D20(random: Random(0));
+    D20 die2 = D20(random: Random(1));
+    expect(die1.roll('d20'), isNot(die2.roll('d20')));
   });
 }
