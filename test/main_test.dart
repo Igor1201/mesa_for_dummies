@@ -1,5 +1,5 @@
 import 'dart:math';
-import 'package:mesa_for_dummies/main.dart';
+import 'package:mesa_for_dummies/d20.dart';
 import 'package:test/test.dart';
 
 void main() {
