@@ -1,6 +1,6 @@
 import 'dart:async';
 import 'package:args/command_runner.dart';
-import 'd20.dart';
+import 'package:d20/d20.dart';
 
 enum ForagingMethod {
   idle, slow_pace, normal_pace, fast_pace,

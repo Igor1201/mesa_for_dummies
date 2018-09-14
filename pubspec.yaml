@@ -8,6 +8,7 @@ environment:
   sdk: '>=2.0.0 <3.0.0'
 
 dependencies:
+  d20: <1.0.0
   args: ^1.5.0
   math_expressions: ^1.0.0
 
