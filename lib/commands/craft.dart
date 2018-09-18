@@ -1,7 +1,13 @@
 import 'dart:async';
+import 'dart:io';
+import 'dart:convert';
+import 'package:http/http.dart' as http;
 import 'package:args/command_runner.dart';
 import 'package:d20/d20.dart';
 import 'package:mesa_for_dummies/data/poultice.dart';
+import 'package:mesa_for_dummies/data/dnd_beyond.dart';
+import 'package:mesa_for_dummies/data/equipment.dart';
+import 'package:mesa_for_dummies/data/auth_equipment.dart';
 
 class CraftCommand extends Command {
   get name => 'craft';
@@ -38,11 +44,55 @@ class CraftCommand extends Command {
     return roll >= poultice.check;
   }
 
+  Future<DNDBeyond> getEquipmentsFromServer() async {
+    Map<String, String> headers = { HttpHeaders.cookieHeader: Platform.environment['BEYOND_COOKIE'] };
+    return http.read('https://www.dndbeyond.com/profile/igor/characters/3615887/json', headers: headers)
+        .then((body) => DNDBeyond.fromJson(json.decode(body)['character']));
+  }
+
+  Future setEquipment(Equipment equipment) async {
+    AuthEquipment authEquipment = AuthEquipment.fromJson(equipment.toJson())
+            ..characterId = 3615887
+            ..username = 'igor'
+            ..csrfToken = '28489d05-2f57-4e81-b1f3-08d30028359b';
+
+    Map<String, String> headers = {
+      HttpHeaders.cookieHeader: Platform.environment['BEYOND_COOKIE'],
+      HttpHeaders.contentTypeHeader: 'application/json;charset=utf-8',
+    };
+    return http.post('https://www.dndbeyond.com/api/character/equipment/custom-item/set', headers: headers, body: json.encode(authEquipment.toJson()))
+        .then((response) => json.decode(response.body));
+  }
+
   Future run() async {
-    bool successful = _singleCraft(poultice);
-    print('''
+    List<Equipment> equipments = (await getEquipmentsFromServer()).customItems;
+    Equipment equipmentPoultice = equipments.firstWhere((Equipment e) => e.name == '${poultice.ingredient.name} Poultice');
+    Equipment equipmentIngredient = equipments.firstWhere((Equipment e) => e.name == poultice.ingredient.name);
+    
+    if (equipmentPoultice != null && equipmentIngredient != null && poultice != null) {
+      if (equipmentIngredient.quantity < poultice.quantity) {
+        print('''
+Crafting was NOT successful.
+Not enough ingredients.
+        ''');
+        return;
+      }
+      
+      bool successful = _singleCraft(poultice);
+      print('''
 Crafting was${!successful ? ' NOT' : ''} successful.
 You have spent ${poultice.quantity}x ${poultice.ingredient.name} and 10 minutes.
-    ''');
+      ''');
+
+      equipmentIngredient.quantity -= poultice.quantity;
+      await setEquipment(equipmentIngredient);
+      if (successful) {
+        print('''
+You have crafted a ${poultice.ingredient.name} Poultice.
+        ''');
+        equipmentPoultice.quantity += 1;
+        await setEquipment(equipmentPoultice);
+      }
+    }
   }
 }

@@ -18,7 +18,7 @@ class Ingredient {
   static const RoyalLichen = Ingredient([6, 7, 8], 'Royal Lichen', 'Recover maximum from next hit die rolled within 1 minute.');
 
   static const Rinwort = Ingredient([1], 'Rinwort', 'Halts petrification.', isSpecial: true);
-  static const DriedGinkoLeaf = Ingredient([2], 'Dried Ginko Leaf', '+5 bunos to Passive Perception for 1 hour.', isSpecial: true);
+  static const DriedGinkoLeaf = Ingredient([2], 'Dried Ginko Leaf', '+5 bonus to Passive Perception for 1 hour.', isSpecial: true);
   static const Hewleaf = Ingredient([3], 'Hewleaf', 'Common antitoxin.', isSpecial: true);
   static const HyssopDew = Ingredient([4], 'Hyssop Dew', 'Darkvision (30 ft.) for 1 hour.', isSpecial: true);
   static const Lilythistle = Ingredient([5], 'Lilythistle', 'Can hold breath for double your normal time.', isSpecial: true);

@@ -1,7 +1,13 @@
 import 'dart:async';
+import 'dart:io';
+import 'dart:convert';
+import 'package:http/http.dart' as http;
 import 'package:args/command_runner.dart';
 import 'package:d20/d20.dart';
 import 'package:mesa_for_dummies/data/ingredient.dart';
+import 'package:mesa_for_dummies/data/dnd_beyond.dart';
+import 'package:mesa_for_dummies/data/equipment.dart';
+import 'package:mesa_for_dummies/data/auth_equipment.dart';
 
 enum ForagingMethod {
   idle, slow_pace, normal_pace, fast_pace,
@@ -57,7 +63,29 @@ class ForageCommand extends Command {
     return null;
   }
 
+  Future<DNDBeyond> getEquipmentsFromServer() async {
+    Map<String, String> headers = { HttpHeaders.cookieHeader: Platform.environment['BEYOND_COOKIE'] };
+    return http.read('https://www.dndbeyond.com/profile/igor/characters/3615887/json', headers: headers)
+        .then((body) => DNDBeyond.fromJson(json.decode(body)['character']));
+  }
+
+  Future setEquipment(Equipment equipment) async {
+    AuthEquipment authEquipment = AuthEquipment.fromJson(equipment.toJson())
+            ..characterId = 3615887
+            ..username = 'igor'
+            ..csrfToken = '28489d05-2f57-4e81-b1f3-08d30028359b';
+
+    Map<String, String> headers = {
+      HttpHeaders.cookieHeader: Platform.environment['BEYOND_COOKIE'],
+      HttpHeaders.contentTypeHeader: 'application/json;charset=utf-8',
+    };
+    return http.post('https://www.dndbeyond.com/api/character/equipment/custom-item/set', headers: headers, body: json.encode(authEquipment.toJson()))
+        .then((response) => json.decode(response.body));
+  }
+
   Future run() async {
+    List<Equipment> equipments = (await getEquipmentsFromServer()).customItems;
+
     Map<Ingredient, int> bag = List.filled(hours, 0)
       .map<Ingredient>((_) => _singleForage())
       .toList()
@@ -68,7 +96,16 @@ class ForageCommand extends Command {
       ..removeWhere((Ingredient i, int index) => i == null);
 
     for (var i = 0; i < bag.length; i++) {
-      print('${bag.keys.elementAt(i)?.name}: ${bag.values.elementAt(i)}');
+      Equipment equipment = equipments.firstWhere((Equipment e) => e.name == bag.keys.elementAt(i)?.name);
+      Ingredient ingredient = bag.keys.elementAt(i);
+      
+      if (equipment != null && ingredient != null) {
+        print('${ingredient.name}: ${bag.values.elementAt(i)}');
+        equipment.quantity += bag.values.elementAt(i);
+        
+        print(equipment.toJson());
+        print(await setEquipment(equipment));
+      }
     }
   }
 }
