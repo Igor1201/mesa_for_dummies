@@ -64,7 +64,8 @@ class ForageCommand extends Command {
       .fold<Map<Ingredient, int>>(Map<Ingredient, int>(), (b, i) {
         b.update(i, (v) => v + 1, ifAbsent: () => 1);
         return b;
-      });
+      })
+      ..removeWhere((Ingredient i, int index) => i == null);
 
     for (var i = 0; i < bag.length; i++) {
       print('${bag.keys.elementAt(i)?.name}: ${bag.values.elementAt(i)}');
