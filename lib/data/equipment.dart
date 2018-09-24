@@ -15,7 +15,7 @@ class Equipment {
 
   @JsonKey(includeIfNull: false)
   double weight;
-  
+
   @JsonKey(includeIfNull: false)
   double cost;
 
@@ -27,7 +27,8 @@ class Equipment {
 
   Equipment();
 
-  factory Equipment.fromJson(Map<String, dynamic> json) => _$EquipmentFromJson(json);
+  factory Equipment.fromJson(Map<String, dynamic> json) =>
+      _$EquipmentFromJson(json);
 
   Map<String, dynamic> toJson() => _$EquipmentToJson(this);
 }

@@ -3,8 +3,9 @@ import 'package:mesa_for_dummies/commands/forage.dart';
 import 'package:mesa_for_dummies/commands/craft.dart';
 
 void main(List<String> arguments) {
-  CommandRunner runner = new CommandRunner('mesa_for_dummies', 'Set of utilities to our RPG sessions.')
-    ..addCommand(new CraftCommand())
-    ..addCommand(new ForageCommand());
+  CommandRunner runner = CommandRunner(
+      'mesa_for_dummies', 'Set of utilities to our RPG sessions.')
+    ..addCommand(CraftCommand())
+    ..addCommand(ForageCommand());
   runner.run(arguments);
 }

@@ -13,12 +13,18 @@ class CraftCommand extends Command {
   get name => 'craft';
   get description => 'Herbalism crafting helper.';
 
-  CraftCommand()
-    : super() {
-      argParser
-        ..addOption('check', abbr: 'c', defaultsTo: '0', help: 'Modifier of your Wisdom crafting check, using your proeficiency in Herbalism Kit.')
-        ..addOption('poultice', abbr: 'p', help: 'The poultice you\'re trying to craft. Eg: wisps_breath, dried_ginko, hewleaf.');
-    }
+  CraftCommand() : super() {
+    argParser
+      ..addOption('check',
+          abbr: 'c',
+          defaultsTo: '0',
+          help:
+              'Modifier of your Wisdom crafting check, using your proeficiency in Herbalism Kit.')
+      ..addOption('poultice',
+          abbr: 'p',
+          help:
+              'The poultice you\'re trying to craft. Eg: wisps_breath, dried_ginko, hewleaf.');
+  }
 
   final D20 _d20 = D20();
   final Map<String, Poultice> _poulticeTable = Map()
@@ -45,31 +51,43 @@ class CraftCommand extends Command {
   }
 
   Future<DNDBeyond> getEquipmentsFromServer() async {
-    Map<String, String> headers = { HttpHeaders.cookieHeader: Platform.environment['BEYOND_COOKIE'] };
-    return http.read('https://www.dndbeyond.com/profile/igor/characters/3615887/json', headers: headers)
+    Map<String, String> headers = {
+      HttpHeaders.cookieHeader: Platform.environment['BEYOND_COOKIE']
+    };
+    return http
+        .read('https://www.dndbeyond.com/profile/igor/characters/3615887/json',
+            headers: headers)
         .then((body) => DNDBeyond.fromJson(json.decode(body)['character']));
   }
 
   Future setEquipment(Equipment equipment) async {
     AuthEquipment authEquipment = AuthEquipment.fromJson(equipment.toJson())
-            ..characterId = 3615887
-            ..username = 'igor'
-            ..csrfToken = '28489d05-2f57-4e81-b1f3-08d30028359b';
+      ..characterId = 3615887
+      ..username = 'igor'
+      ..csrfToken = '28489d05-2f57-4e81-b1f3-08d30028359b';
 
     Map<String, String> headers = {
       HttpHeaders.cookieHeader: Platform.environment['BEYOND_COOKIE'],
       HttpHeaders.contentTypeHeader: 'application/json;charset=utf-8',
     };
-    return http.post('https://www.dndbeyond.com/api/character/equipment/custom-item/set', headers: headers, body: json.encode(authEquipment.toJson()))
+    return http
+        .post(
+            'https://www.dndbeyond.com/api/character/equipment/custom-item/set',
+            headers: headers,
+            body: json.encode(authEquipment.toJson()))
         .then((response) => json.decode(response.body));
   }
 
   Future run() async {
     List<Equipment> equipments = (await getEquipmentsFromServer()).customItems;
-    Equipment equipmentPoultice = equipments.firstWhere((Equipment e) => e.name == '${poultice.ingredient.name} Poultice');
-    Equipment equipmentIngredient = equipments.firstWhere((Equipment e) => e.name == poultice.ingredient.name);
-    
-    if (equipmentPoultice != null && equipmentIngredient != null && poultice != null) {
+    Equipment equipmentPoultice = equipments.firstWhere(
+        (Equipment e) => e.name == '${poultice.ingredient.name} Poultice');
+    Equipment equipmentIngredient = equipments
+        .firstWhere((Equipment e) => e.name == poultice.ingredient.name);
+
+    if (equipmentPoultice != null &&
+        equipmentIngredient != null &&
+        poultice != null) {
       if (equipmentIngredient.quantity < poultice.quantity) {
         print('''
 Crafting was NOT successful.
@@ -77,7 +95,7 @@ Not enough ingredients.
         ''');
         return;
       }
-      
+
       bool successful = _singleCraft(poultice);
       print('''
 Crafting was${!successful ? ' NOT' : ''} successful.

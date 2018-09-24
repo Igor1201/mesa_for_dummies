@@ -16,7 +16,8 @@ class AuthEquipment extends Equipment {
 
   AuthEquipment();
 
-  factory AuthEquipment.fromJson(Map<String, dynamic> json) => _$AuthEquipmentFromJson(json);
+  factory AuthEquipment.fromJson(Map<String, dynamic> json) =>
+      _$AuthEquipmentFromJson(json);
 
   Map<String, dynamic> toJson() => _$AuthEquipmentToJson(this);
 }
