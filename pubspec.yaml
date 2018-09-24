@@ -1,8 +1,11 @@
 name: mesa_for_dummies
 description: A sample command-line application.
-# version: 1.0.0
-# homepage: https://www.example.com
-# author: Igor Borges <email@example.com>
+version: 0.1.0
+homepage: https://github.com/Igor1201/mesa_for_dummies
+author: Igor Borges <igor@borges.me>
+
+executables:
+  mesa-for-dummies: main
 
 environment:
   sdk: '>=2.0.0 <3.0.0'
