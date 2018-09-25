@@ -23,7 +23,7 @@ class CraftCommand extends Command {
       ..addOption('poultice',
           abbr: 'p',
           help:
-              'The poultice you\'re trying to craft. Eg: wisps_breath, dried_ginko, hewleaf.');
+              'The poultice you\'re trying to craft. One of: wisps_breath, blue_cap, spur_root, lavender_seeds, royal_lichen, rinwort, dried_ginko, hewleaf, hyssop_dew, lilythistle, silver_thornberry.');
   }
 
   final D20 _d20 = D20();
